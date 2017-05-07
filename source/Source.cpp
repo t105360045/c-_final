@@ -9,10 +9,6 @@ const char filename[] = "c:\\file\\file.dat";
 
 class Date;
 
-//void write();
-//void read();
-//void welcome();
-//int  wel_re();
 
 class Date
 {
@@ -30,6 +26,10 @@ public:
 		day = 0;
 		item = "";
 		price = 0;
+	}
+	~Date()
+	{
+		
 	}
 	Date(int a, int b, int c, string d, int e)
 	{
@@ -109,7 +109,7 @@ public:
 		cout << "歡迎使用本記帳程式\n";
 		while (repeat)
 		{
-			cout << "1.記帳 2.查帳 : ";
+			cout << "1.記帳 2.關鍵字查帳 3.日平均花費查帳 : ";
 			cin >> option;
 			switch (option)
 			{
@@ -121,6 +121,10 @@ public:
 				cout << "\n請輸入關鍵字 : ";
 				cin >> str;
 				read(str);
+				repeat = wel_re();
+				break;
+			case '3':
+				average(search_ymd());
 				repeat = wel_re();
 				break;
 			default:
@@ -174,24 +178,18 @@ public:
 		{
 			while (1)
 			{
-				form.setyear();
-				if (form.getyear() == 0)
+				form = search_ymdip();
+				
+				if (form.item == "fail")
+				{
 					break;
-				form.setmonth();
-				if (form.getmonth() == 0)
-					break;
-				form.setday();
-				if (form.getday() == 0)
-					break;
-				form.setitem();
-				if (form.getitem() == "0")
-					break;
-				form.setprice();
-				if (form.getprice() == 0)
-					break;
-				cout << form;
-				cout << "是否輸入正確(Y/N)? :";
-				cin >> question;
+				}
+				else
+				{
+					cout << form;
+					cout << "是否輸入正確(Y/N)? :";
+					cin >> question;
+				}
 				if (question == 'Y' || question == 'y')
 					filePtr.write((char*)&form, sizeof(form));
 				else
@@ -210,7 +208,6 @@ public:
 			cout << "開啟輸入檔錯誤!\n";
 			system("pause");
 			exit(EXIT_FAILURE);
-
 		}
 		else
 		{
@@ -266,6 +263,170 @@ public:
 		}
 		return str;
 	}
+	
+	Date search_ymdip()
+	{
+		Date search;
+		Date fail(0, 0, 0, "fail", 0);
+		int key_ok = 0;
+		while (1)
+		{
+			search.setyear();
+			if (search.getyear() == 0)
+			{
+				key_ok = 0;
+				break;
+			}
+			else
+			{
+				key_ok = 1;
+			}
+
+			search.setmonth();
+			if (search.getmonth() == 0)
+			{
+				key_ok = 0;
+				break;
+			}
+			else
+			{
+				key_ok = 1;
+			}
+
+			search.setday();
+			if (search.getday() == 0)
+			{
+				key_ok = 0;
+				break;
+			}
+			else
+			{
+				key_ok = 1;
+			}		
+
+			search.setitem();
+			if (search.getitem ()== "0")
+			{
+				key_ok = 0;
+				break;
+			}
+			else
+			{
+				key_ok = 1;
+			}
+
+			search.setprice();
+			if (search.getprice()==0)
+			{
+				key_ok = 0;
+				break;
+			}
+			else
+			{
+				key_ok = 1;
+			}
+
+			if (key_ok == 1)
+				break;
+		}
+		if (key_ok == 1)
+			return search;
+		else
+			return fail;
+	}
+
+	Date search_ymd()
+	{
+		Date search;
+		Date fail(0, 0, 0, "fail", 0);
+		int key_ok=0;
+		while (1)
+		{
+			search.setyear();
+			if (search.getyear() == 0)
+			{
+				key_ok = 0;
+				break;
+			}
+			else
+				key_ok = 1;
+
+			search.setmonth();
+			if (search.getmonth() == 0)
+			{
+				key_ok = 0;
+				break;
+			}
+			else
+				key_ok = 1;
+
+			search.setday();
+			if (search.getday() == 0)
+			{
+				key_ok = 0;
+				break;
+			}
+			else
+				key_ok = 1;
+			if (key_ok == 1)
+			{
+				break;
+			}
+		}
+		if (key_ok == 1)
+			return search;
+		else
+			return fail;
+	}
+
+
+	void average(Date search)//平均計算
+	{
+		
+		Date ave;
+		ifstream filePtr;
+		int count = 0;
+		filePtr.open(filename, ios::binary | ios::in);
+		
+		if (!filePtr)
+		{
+			cout << "開啟輸入檔錯誤!\n";
+			system("pause");
+			exit(EXIT_FAILURE);
+		}
+		else
+		{
+
+			while (!filePtr.eof())
+			{
+
+				filePtr.read((char*)this, sizeof(*this));
+
+				if (filePtr.eof())
+					break;
+				if ((search.year == year) && (search.month == month) && (search.day == day))
+				{
+					count++;
+					ave.year = year;
+					ave.month = month;
+					ave.day = day;
+					ave.price += price;
+					cout << *this;
+				}				
+			}
+			if (count == 0)
+			{
+				cout << "查無資料";
+			}
+			else
+			{
+				ave.item = "日花費平均";
+				ave.price = ave.price / count;
+				cout << ave;
+			}
+		}
+		filePtr.close();
+	}
 };
 istream & operator >> (istream& in, Date& obj)
 {
@@ -289,7 +450,7 @@ int main()
 	a.welcome();
 	
 	
-
+	a.~Date();
 	system("pause");
 	return 0;
 }
